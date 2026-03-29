@@ -1,15 +1,16 @@
 import nodemailer from "nodemailer";
 import "dotenv/config";
 import { createWelcomeEmailTemplate } from "./emailTemplate.js";
+import { ENV } from "../env.js";
 
 
 const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT) || 587,
-    service: process.env.SMTP_SERVICE,
+    host: ENV.SMTP_HOST,
+    port: Number(ENV.SMTP_PORT) || 587,
+    service: ENV.SMTP_SERVICE,
     auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
+        user: ENV.SMTP_USER,
+        pass: ENV.SMTP_PASS,
     }
 })
 
@@ -19,10 +20,10 @@ export const sendEmail = async(to: string, subject: string, templateName: string
         await transporter.verify();
 
         await transporter.sendMail({
-            from: `${process.env.SMTP_USER}`,
+            from: `${ENV.SMTP_USER}`,
             to,
             subject,
-            html: createWelcomeEmailTemplate(templateName, process.env.FORNTEND_URI!),
+            html: createWelcomeEmailTemplate(templateName, ENV.FORNTEND_URI!),
         });
         return true;
     } catch (error) {

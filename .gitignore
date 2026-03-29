@@ -39,3 +39,4 @@ pnpm-debug.log*
 # --- Database (Common for Node/Express) ---
 *.sqlite
 *.db
+/generated/prisma
