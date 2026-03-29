@@ -19,5 +19,7 @@ router.post("/logout", logout)   // POST to prevent unauthorized state changes a
 
 router.put("/update-profile", isAuthenticated, updateProfile);
 router.get("/check", isAuthenticated, (req: any, res: Response) => res.status(200).json(req.user))
+router.put("/update-profile", isAuthenticated, updateProfile);
+router.get("/check", isAuthenticated, (req: any, res: Response) => res.status(200).json(req.user))
 
 export default router;
