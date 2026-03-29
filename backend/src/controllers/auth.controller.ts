@@ -1,8 +1,8 @@
 import type { Request, Response } from "express"
-import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../lib/utils/cookies.js";
 import { sendEmail } from "../lib/email/emailRender.js";
+import prisma from "../../prisma/index.js";
 
 export const signup = async (req: Request, res: Response) => {
     try {
@@ -16,26 +16,28 @@ export const signup = async (req: Request, res: Response) => {
         if (!emailRegex.test(email))
             return res.status(400).json({ message: "Invalid email format" });  // Email verification
 
-        const user = await User.findOne({ email, });
+        const user = await prisma.user.findUnique({
+            where: { email },
+        })
         if (user)
             return res.status(400).json({ message: "Email already exists" });
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({
-            fullName,
-            email,
-            password: hashedPassword,
+        const newUser = await prisma.user.create({
+            data: {
+                fullName,
+                email,
+                password: hashedPassword,
+            }
         });
 
-        await newUser.save();
-
-        generateToken(newUser._id as object, res);
+        generateToken(newUser.id, res);
 
         sendEmail(newUser.email as string, "Welcome to Chatapp", newUser.fullName as string)
             .catch(err => console.error("Email failed to send", err));
 
         return res.status(201).json({
-            _id: newUser._id,
+            id: newUser.id,
             fullName: newUser.fullName,
             email: newUser.email,
             profilePic: newUser.profilePic,
@@ -51,23 +53,26 @@ export const login = async (req: Request, res: Response) => {
         const { email, password } = req.body;
         if (!email || !password) return res.status(400).json({ message: "All fields are required" });
 
-        const user = await User.findOne({ email });
+        const user = await prisma.user.findUnique({ where: { email } });
         if (!user) return res.status(400).json({ message: "Invalid Credentials" });
+        const checkPassword = await bcrypt.compare(password, user.password);
+        if (!checkPassword) return res.status(400).json({ message: "Invalid Credentials" });
 
-        const checkPassword = await bcrypt.compare(password, user.password as string);
-        generateToken(user._id as object, res);
+        generateToken(user.id, res);
 
-        res.status(200).json({ 
-            _id: user._id,
+        res.status(200).json({
+            id: user.id,
             fullName: user.fullName,
             email: user.email,
             profilePic: user.profilePic,
         })
     } catch (error) {
-
+        console.error("Error in login controller:\n", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 }
 
 export const logout = (req: Request, res: Response) => {
-    res.send("Logout Endpoint")
+    res.cookie("jwt", "", { maxAge: 0 });
+    res.status(200).json({ message: "Logged out successfully" });
 }

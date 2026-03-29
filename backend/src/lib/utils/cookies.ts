@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import { ENV } from "../env.js";
 
 
-export const generateToken = (userId: object, res: Response) => {
+export const generateToken = (userId: string, res: Response) => {
     const token = jwt.sign({ userId }, ENV.JWT_SECRET!, { expiresIn: "7d" });
 
     res.cookie("jwt", token, {
@@ -11,6 +11,7 @@ export const generateToken = (userId: object, res: Response) => {
         httpOnly: true,             // For XSS attacks: cross site scripting
         sameSite: "strict",        // CSRF attacks
         secure: ENV.NODE_ENV === "production" ? true : false,   // enabling https connections
+        path: "/",
     });
 
     return token;

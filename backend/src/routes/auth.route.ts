@@ -1,14 +1,12 @@
 import express, { type Request, type Response } from "express";
-import { signup, login } from "../controllers/auth.controller.js";
+import { signup, login, logout } from "../controllers/auth.controller.js";
 
 const router = express.Router();
 
-router.get("/signup", signup)
+router.post("/signup", signup)
+router.post("/login", login)
+router.post("/logout", logout);  // POST to prevent unauthorized state changes and protect against CSRF attacks.
 
-router.get("/login", login)
-
-router.get("/logout", (req: Request, res: Response) => {
-    res.send("Logout Endpoint");
-})
+// router.put("/update-profile", isAuthenticated, updateProfile);
 
 export default router;
