@@ -16,6 +16,7 @@ dotenv.config();
 const app = express();
 const PORT = ENV.PORT || 3000;
 
+app.set("trust proxy", 1);     // for load balancers
 app.use(express.json());
 app.use(cookieParser());
 

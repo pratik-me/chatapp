@@ -1,12 +1,13 @@
-import express, { type Request, type Response } from "express";
+import express, { type Response } from "express";
 import { signup, login, logout, updateProfile } from "../controllers/auth.controller.js";
 import { isAuthenticated } from "../middleware/auth.middleware.js";
 import rateLimit from "express-rate-limit";
 
 const router = express.Router();
 const limiter = rateLimit({
-    windowMs: 5 * 60 * 1000,
-    limit: 50,
+    windowMs: 15 * 60 * 1000,
+    limit: 10,
+    message: "Too many login attempts, please try again after 15 minutes",
     standardHeaders: "draft-8",
     legacyHeaders: false,
 })

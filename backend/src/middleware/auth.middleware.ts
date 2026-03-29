@@ -15,6 +15,7 @@ export const isAuthenticated = async (req: any, res: Response, next: NextFunctio
 
         const user = await prisma.user.findUnique({
             where: {id: decoded.userId},
+            select: {password: true},
         });
         if(!user) return res.status(404).json({message: "User not found"});
 
