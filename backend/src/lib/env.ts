@@ -11,4 +11,7 @@ export const ENV = {
     SMTP_PORT: process.env.SMTP_PORT,
     SMTP_SERVICE: process.env.SMTP_SERVICE,
     SMTP_HOST: process.env.SMTP_HOST,
+    CLOUDINARY_NAME: process.env.CLOUDINARY_NAME,
+    CLOUDINARY_SECRET: process.env.CLOUDINARY_SECRET,
+    CLOUDINARY_KEY: process.env.CLOUDINARY_KEY,
 }
