@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import { connectDB } from "./lib/db.js";
 import cookieParser from "cookie-parser";
 import { ENV } from "./lib/env.js";
+import cors from "cors";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,6 +19,10 @@ const PORT = ENV.PORT || 3000;
 
 app.set("trust proxy", 1);     // for load balancers
 app.use(express.json());
+app.use(cors({
+    origin: ENV.FORNTEND_URI,
+    credentials: true,
+}))
 app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
