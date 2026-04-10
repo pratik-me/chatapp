@@ -1,16 +1,15 @@
 import express, { type Request, type Response } from "express";
-import { getAllContacts, getMessagesById } from "../controllers/message.controller.js";
+import { getAllContacts, getChatPartners, getMessagesById, sendMessage } from "../controllers/message.controller.js";
 import { isAuthenticated } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
-router.get("/contacts", isAuthenticated, getAllContacts);
-// router.get("/chats", getChatPartners);
-router.get("/:id", isAuthenticated, getMessagesById);
-// router.post("/send/:id", sendMessage);
+router.use(isAuthenticated);
 
-router.get("/sent", (req: Request, res: Response) => {
-    res.send("Message send endpoint")
-})
+router.get("/contacts", getAllContacts);
+router.get("/chats", getChatPartners);
+router.get("/messages/:id", getMessagesById);
+router.post("/send/:id", sendMessage);
+
 
 export default router;

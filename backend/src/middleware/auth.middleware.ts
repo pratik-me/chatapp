@@ -6,24 +6,28 @@ import prisma from "../../prisma/index.js";
 export const isAuthenticated = async (req: any, res: Response, next: NextFunction) => {
     try {
         const token = req.cookies.jwt;
-        if(!token) 
-            return res.status(401).json({message: "Unauthorized Access: No token provided"});
+        if (!token)
+            return res.status(401).json({ message: "Unauthorized Access: No token provided" });
 
-        const decoded = jwt.verify(token, ENV.JWT_SECRET!) as {userId: string};
-        if(!decoded) 
-            return res.status(401).json({message: "Unauthorized Access: Invalid token"});
+        const decoded = jwt.verify(token, ENV.JWT_SECRET!) as { userId: string };
+        if (!decoded)
+            return res.status(401).json({ message: "Unauthorized Access: Invalid token" });
 
         const user = await prisma.user.findUnique({
-            where: {id: decoded.userId},
-            select: {password: true},
+            where: { id: decoded.userId },
+            select: {
+                id: true,
+                fullName: true,
+                email: true,
+            },
         });
-        if(!user) return res.status(404).json({message: "User not found"});
+        if (!user) return res.status(404).json({ message: "User not found" });
 
         req.user = user;
-        
+
         next();
     } catch (error) {
         console.log("Error in isAuthenticated middleware.\n", error);
-        res.status(401).json({message: "Internal Server error"});
+        res.status(401).json({ message: "Internal Server error" });
     }
 }
