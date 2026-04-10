@@ -2,19 +2,24 @@ import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 import { AxiosError } from "axios";
+import type { SignupFormData } from "../pages/SignupPage";
+import type { LoginFormData } from "../pages/LoginPage";
 
 type AuthStore = {
     authUser: any;
     isCheckingAuth: boolean;
     isSingingUp: boolean;
+    isLogginIn: boolean;
     checkAuth: () => void;
-    signup: (data: any) => void;
+    signup: (data: SignupFormData) => void;
+    login: (data: LoginFormData) => void;
 }
 
 export const useAuthStore = create<AuthStore>(set => ({
     authUser: null,
     isCheckingAuth: true,
     isSingingUp: false,
+    isLogginIn: false,
 
     checkAuth: async () => {
         try {
@@ -28,7 +33,7 @@ export const useAuthStore = create<AuthStore>(set => ({
         }
     },
 
-    signup: async (data: any) => {
+    signup: async (data: SignupFormData) => {
         try {
             set({ isSingingUp: true });
             const res = await axiosInstance.post("/auth/signup", data);
@@ -43,6 +48,24 @@ export const useAuthStore = create<AuthStore>(set => ({
             }
         } finally {
             set({ isSingingUp: false });
+        }
+    },
+
+    login: async (data: LoginFormData) => {
+        try {
+            set({ isLogginIn: true });
+            const res = await axiosInstance.post("/auth/login", data);
+            set({authUser: res.data})
+            toast.success("Logged in successfully!");
+        } catch (error) {
+            if (error instanceof AxiosError)
+                toast.error(error.response?.data.message);
+            else {
+                console.log(error);
+                toast.error("Something went wrong. Please try again later");
+            }
+        } finally {
+            set({ isLogginIn: false });
         }
     }
 }))

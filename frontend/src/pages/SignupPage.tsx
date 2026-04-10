@@ -10,8 +10,14 @@ import {
 import { useAuthStore } from "../store/useAuthStore";
 import { Link } from "react-router";
 
+export type SignupFormData = {
+  fullName: string;
+  email: string;
+  password: string;
+}
+
 const SignupPage = () => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<SignupFormData>({
     fullName: "",
     email: "",
     password: "",
