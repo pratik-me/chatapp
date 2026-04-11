@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     // File Layout
-    "rootDir": "./",
+    "rootDir": "../",
     "outDir": "./dist",
 
     // Environment Settings
@@ -11,6 +11,10 @@
     // For nodejs:
     // "lib": ["esnext"],
     // "types": ["node"],
+
+    "paths": {
+      "@prisma" : ["../packages/db/prisma.js"],
+    },
 
     // Other Outputs
     "sourceMap": true,

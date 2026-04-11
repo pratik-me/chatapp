@@ -1,5 +1,5 @@
 import type { Response } from "express";
-import prisma from "../../prisma/index.js";
+import prisma from "@prisma";
 
 export const getAllContacts = async (req: any, res: Response) => {
     try {

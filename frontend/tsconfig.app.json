@@ -7,6 +7,9 @@
     "module": "ESNext",
     "types": ["vite/client"],
     "skipLibCheck": true,
+    "paths": {
+      "@prisma/db-types" : ["../packages/generated/client/index.d.ts"],
+    },
 
     /* Bundler mode */
     "moduleResolution": "bundler",

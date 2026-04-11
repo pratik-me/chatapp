@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import { generateToken } from "../lib/utils/cookies.js";
 import { sendEmail } from "../lib/email/emailRender.js";
 import cloudinary from "../lib/cloudinary/index.js";
-import prisma from "../../prisma/index.js";
+import prisma from "@prisma";
 
 export const signup = async (req: Request, res: Response) => {
     try {
