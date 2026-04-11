@@ -10,10 +10,12 @@ type AuthStore = {
     isCheckingAuth: boolean;
     isSingingUp: boolean;
     isLogginIn: boolean;
+    isProfileLoading: boolean;
     checkAuth: () => void;
     signup: (data: SignupFormData) => void;
     login: (data: LoginFormData) => void;
     logout: (data: any) => void;
+    updateProfile: (data: any) => void;
 }
 
 export const useAuthStore = create<AuthStore>(set => ({
@@ -21,6 +23,7 @@ export const useAuthStore = create<AuthStore>(set => ({
     isCheckingAuth: true,
     isSingingUp: false,
     isLogginIn: false,
+    isProfileLoading: false,
 
     checkAuth: async () => {
         try {
@@ -60,7 +63,7 @@ export const useAuthStore = create<AuthStore>(set => ({
             toast.success("Logged in successfully!");
         } catch (error) {
             if (error instanceof AxiosError)
-                toast.error(error.response?.data.message);
+                toast.error(error.response?.data);
             else {
                 console.log("Login error:\n", error);
                 toast.error("Something went wrong. Please try again later");
@@ -78,6 +81,21 @@ export const useAuthStore = create<AuthStore>(set => ({
         } catch (error) {
             toast.error("Failed to log out");
             console.log("Log Out error:\n", error)
+        }
+    },
+
+    updateProfile: async (data: any) => {
+        try {
+            set({isProfileLoading: true});
+            const res = await axiosInstance.post("/auth/update-profile", data);
+            set({ authUser: res.data });
+            toast.success("Profile updated successfully");
+        } catch (error) {
+            console.log("Error in update profile:", error);
+            if (error instanceof AxiosError) toast.error(error.response?.data.message);
+            else toast.error("Something went wrong while updating profile!")
+        } finally {
+            set({isProfileLoading: false});
         }
     }
 }))

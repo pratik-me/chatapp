@@ -1,0 +1,68 @@
+import { create } from "zustand";
+import { axiosInstance } from "../lib/axios";
+import toast from "react-hot-toast";
+import { AxiosError } from "axios";
+
+export type ChatStore = {
+    allContacts: Object[];
+    chats: string[];
+    messages: string[];
+    activeTab: "chats" | "contacts";
+    selectedUser: any;
+    isUsersLoading: boolean;
+    isMessagesLoading: boolean;
+    isSoundEnabled: boolean;
+
+    toggleSound: () => void;
+    setActiveTab: (tab: "chats" | "contacts") => void;
+    setSelectedUser: (user: any) => void
+    getAllContacts: () => void;
+    getChatPartners: () => void;
+}
+
+export const useChatStore = create<ChatStore>((set, get) => ({
+    allContacts: [],
+    chats: [],
+    messages: [],
+    activeTab: "chats",
+    selectedUser: null,
+    isUsersLoading: false,
+    isMessagesLoading: false,
+    isSoundEnabled: localStorage.getItem("isSoundEnabled") === "true",
+
+    toggleSound: () => {
+        localStorage.setItem("isSoundEnabled", `${!get().isSoundEnabled}`)
+        set({ isSoundEnabled: !get().isSoundEnabled })
+    },
+
+    setActiveTab: (tab) => set({ activeTab: tab }),
+
+    setSelectedUser: (user) => set({ selectedUser: user }),
+
+    getAllContacts: async () => {
+        try {
+            set({ isUsersLoading: true });
+            const res = await axiosInstance.get("/messages/contacts");
+            set({ allContacts: res.data });
+        } catch (error) {
+            if (error instanceof AxiosError)
+                toast.error(error.response?.data.message);
+        } finally {
+            set({ isUsersLoading: false });
+        }
+    },
+    getChatPartners: async () => {
+        try {
+            set({isUsersLoading: true});
+            const res = await axiosInstance.get("/messages/chats");
+            set({chats: res.data});
+        } catch (error) {
+            console.log(error);
+            if(error instanceof AxiosError)
+                toast.error(error.response?.data.message);
+            else toast.error("Something went wrong while fetching chat partners!")
+        } finally {
+            set({isUsersLoading: false});
+        }
+    },
+}))
