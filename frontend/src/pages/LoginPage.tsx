@@ -3,7 +3,6 @@ import {
   LockIcon,
   MailIcon,
   MessageCircleIcon,
-  UserIcon,
 } from "lucide-react";
 import { Link } from "react-router";
 import { BorderAnimatedContainer } from "../components/BorderAnimatedContainer";
