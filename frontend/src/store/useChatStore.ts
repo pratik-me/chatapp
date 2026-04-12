@@ -20,6 +20,7 @@ export type ChatStore = {
     getAllContacts: () => void;
     getChatPartners: () => void;
     getMessagesByUserId: (userId: string) => void;
+    sendMessage: (msg : {text?: string; image?: string | null}) => void;
 }
 
 export const useChatStore = create<ChatStore>((set, get) => ({
@@ -80,6 +81,18 @@ export const useChatStore = create<ChatStore>((set, get) => ({
             console.log("Error while fetching partner message:", error);
         } finally {
             set({isMessagesLoading: false});
+        }
+    },
+
+    sendMessage: async(msg) => {
+        try {
+            const {selectedUser} = get();
+            const res = await axiosInstance.post(`/messages/send/${selectedUser?.id}`, msg);
+            set((prev) => ({messages: prev.messages.concat(res.data)}));
+        } catch (error) {
+            if(error instanceof AxiosError)
+                toast.error(error.response?.data.message || "Failed to send message!");
+            console.log("Error while sending message: \n", error);   
         }
     }
 }))

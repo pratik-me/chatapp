@@ -4,7 +4,7 @@ import { useChatStore } from "../store/useChatStore";
 import ChatHeader from "./ChatHeader";
 import NoChatHistoryPlaceholder from "./NoChatHistoryPlaceholder";
 import MessageInput from "./MessageInput";
-import MessagesLoadingSkeleton from "./MessagesLoadingSkelton";
+import MessagesLoadingSkeleton from "./MessagesLoadingSkeleton";
 
 const ChatContainer = () => {
   const { selectedUser, getMessagesByUserId, messages, isMessagesLoading} = useChatStore();
@@ -43,7 +43,7 @@ const ChatContainer = () => {
 
                   {msg.text && <p className="mt-2">{msg.text}</p>}
                   <p className="text-xs mt-1 opacity-75 flex items-center gap-1">
-                    {new Date(msg.createdAt).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"})};
+                    {new Date(msg.createdAt).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"})}
                   </p>
                 </div>
               </div>

@@ -10,8 +10,6 @@ export const getAllContacts = async (req: any, res: Response) => {
                 id: true,
                 fullName: true,
                 email: true,
-                sentMessages: true,
-                receivedMessages: true,
             }
         });
 
@@ -53,7 +51,7 @@ export const sendMessage = async (req: any, res: Response) => {
         if (!partnerExists) return res.status(400).json({ message: "Receiver not found" });
 
         if (userId === partnerId) return res.status(400).json({ message: "Cannot send message to yourself" })
-        if (!image || !text.trim()) return res.status(400).json({ message: "Empty message found" })
+        if (!image && !text.trim()) return res.status(400).json({ message: "Empty message found" })
         else if (!image) {
             const message = await prisma.message.create({
                 data: {
