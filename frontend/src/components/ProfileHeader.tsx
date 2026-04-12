@@ -8,9 +8,7 @@ const mouseClickSound = new Audio("/Sounds/mouse-click.mp3");
 const ProfileHeader = () => {
   const { authUser, logout, updateProfile, isProfileLoading } = useAuthStore();
   const { isSoundEnabled, toggleSound } = useChatStore();
-  const [selectedImg, setSelectedImg] = useState<null | ArrayBuffer | string>(
-    null
-  );
+  const [selectedImg, setSelectedImg] = useState<null | string>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const handleImageUpload = (e: any) => {
     try {
@@ -22,8 +20,10 @@ const ProfileHeader = () => {
 
       reader.onloadend = async () => {
         const base64Image = reader.result;
-        await updateProfile({ profilePic: base64Image });
-        setSelectedImg(base64Image);
+        if (typeof base64Image === "string") {
+          await updateProfile({ profilePic: base64Image });
+          setSelectedImg(base64Image);
+        }
       };
     } catch (error) {
       console.log("Error while uploading:", error);
@@ -48,8 +48,8 @@ const ProfileHeader = () => {
               />
               {isProfileLoading ? (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                <span className="loading loading-ring loading-lg text-secondary"></span>
-              </div>
+                  <span className="loading loading-ring loading-lg text-secondary"></span>
+                </div>
               ) : (
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                   <span className="text-white text-xs">Edit</span>
@@ -68,7 +68,7 @@ const ProfileHeader = () => {
           {/* Username and Status */}
           <div>
             <h3 className="text-slate-200 font-medium text-base max-w-[180px] truncate">
-              {authUser.fullName}
+              {authUser?.fullName}
             </h3>
 
             <p className="text-slate-400 text-xs">Online</p>

@@ -2,20 +2,21 @@ import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 import { AxiosError } from "axios";
+import type { User, Message} from "@prisma/db-types"
 
 export type ChatStore = {
-    allContacts: Object[];
-    chats: string[];
-    messages: string[];
+    allContacts: User[];
+    chats: User[];
+    messages: Message[];
     activeTab: "chats" | "contacts";
-    selectedUser: any;
+    selectedUser: User | null;
     isUsersLoading: boolean;
     isMessagesLoading: boolean;
     isSoundEnabled: boolean;
 
     toggleSound: () => void;
     setActiveTab: (tab: "chats" | "contacts") => void;
-    setSelectedUser: (user: any) => void
+    setSelectedUser: (user: User) => void
     getAllContacts: () => void;
     getChatPartners: () => void;
 }
@@ -51,6 +52,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
             set({ isUsersLoading: false });
         }
     },
+
     getChatPartners: async () => {
         try {
             set({isUsersLoading: true});

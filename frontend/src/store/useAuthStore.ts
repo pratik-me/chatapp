@@ -4,9 +4,10 @@ import toast from "react-hot-toast";
 import { AxiosError } from "axios";
 import type { SignupFormData } from "../pages/SignupPage";
 import type { LoginFormData } from "../pages/LoginPage";
+import type { User } from "@prisma/db-types";
 
 type AuthStore = {
-    authUser: any;
+    authUser: User | null;
     isCheckingAuth: boolean;
     isSingingUp: boolean;
     isLogginIn: boolean;
@@ -14,7 +15,7 @@ type AuthStore = {
     checkAuth: () => void;
     signup: (data: SignupFormData) => void;
     login: (data: LoginFormData) => void;
-    logout: (data: any) => void;
+    logout: () => void;
     updateProfile: (data: any) => void;
 }
 
@@ -84,7 +85,7 @@ export const useAuthStore = create<AuthStore>(set => ({
         }
     },
 
-    updateProfile: async (data: any) => {
+    updateProfile: async (data: {profilePic: string | null}) => {
         try {
             set({isProfileLoading: true});
             const res = await axiosInstance.post("/auth/update-profile", data);

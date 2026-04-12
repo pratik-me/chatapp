@@ -8,7 +8,7 @@
     "types": ["vite/client"],
     "skipLibCheck": true,
     "paths": {
-      "@prisma/db-types" : ["../packages/generated/client/index.d.ts"],
+      "@prisma/db-types" : ["../generated/prisma/client.ts"],
     },
 
     /* Bundler mode */
