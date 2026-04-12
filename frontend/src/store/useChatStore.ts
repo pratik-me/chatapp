@@ -16,9 +16,10 @@ export type ChatStore = {
 
     toggleSound: () => void;
     setActiveTab: (tab: "chats" | "contacts") => void;
-    setSelectedUser: (user: User) => void
+    setSelectedUser: (user: User | null) => void
     getAllContacts: () => void;
     getChatPartners: () => void;
+    getMessagesByUserId: (userId: string) => void;
 }
 
 export const useChatStore = create<ChatStore>((set, get) => ({
@@ -67,4 +68,18 @@ export const useChatStore = create<ChatStore>((set, get) => ({
             set({isUsersLoading: false});
         }
     },
+
+    getMessagesByUserId: async(userId) => {
+        try {
+            set({isMessagesLoading: true});
+            const res = await axiosInstance.get(`/messages/${userId}`);
+            set({messages: res.data})
+        } catch (error) {
+            if(error instanceof AxiosError)
+                toast.error(error.response?.data.message || "Something went wrong!");
+            console.log("Error while fetching partner message:", error);
+        } finally {
+            set({isMessagesLoading: false});
+        }
+    }
 }))

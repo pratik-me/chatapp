@@ -1,14 +1,14 @@
-import ActiveTabSwitch from "../components/ActiveTabSwitch"
-import { BorderAnimatedContainer } from "../components/BorderAnimatedContainer"
-import ChatContainer from "../components/ChatContainer"
-import ChatsList from "../components/ChatsList"
-import ContactsList from "../components/ContactsList"
-import NoConversationPlaceholder from "../components/NoConversationPlaceholder"
-import ProfileHeader from "../components/ProfileHeader"
-import { useChatStore } from "../store/useChatStore"
+import ActiveTabSwitch from "../components/ActiveTabSwitch";
+import { BorderAnimatedContainer } from "../components/BorderAnimatedContainer";
+import ChatContainer from "../components/ChatContainer";
+import ChatsList from "../components/ChatsList";
+import ContactsList from "../components/ContactsList";
+import NoConversationPlaceholder from "../components/NoConversationPlaceholder";
+import ProfileHeader from "../components/ProfileHeader";
+import { useChatStore } from "../store/useChatStore";
 
 const ChatPage = () => {
-  const {activeTab, selectedUser} = useChatStore();
+  const { activeTab, selectedUser } = useChatStore();
   return (
     <div className="relative w-full max-w-6xl h-[800px]">
       <BorderAnimatedContainer>
@@ -22,10 +22,12 @@ const ChatPage = () => {
         </div>
 
         {/* Right Side */}
-        {selectedUser ? <ChatContainer /> : <NoConversationPlaceholder />}
+        <div className="flex-1 flex flex-col bg-slate-900/50 backdrop-blur-sm">
+          {selectedUser ? <ChatContainer /> : <NoConversationPlaceholder />}
+        </div>
       </BorderAnimatedContainer>
     </div>
-  )
-}
+  );
+};
 
-export default ChatPage
+export default ChatPage;

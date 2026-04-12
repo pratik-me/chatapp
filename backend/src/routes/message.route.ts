@@ -8,7 +8,7 @@ router.use(isAuthenticated);
 
 router.get("/contacts", getAllContacts);
 router.get("/chats", getChatPartners);
-router.get("/messages/:id", getMessagesById);
+router.get("/:id", getMessagesById);
 router.post("/send/:id", sendMessage);
 
 

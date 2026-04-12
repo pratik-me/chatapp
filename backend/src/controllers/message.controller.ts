@@ -25,7 +25,7 @@ export const getAllContacts = async (req: any, res: Response) => {
 export const getMessagesById = async (req: any, res: Response) => {
     try {
         const userId = req.user.id;
-        const partnerId = req.params;
+        const { id: partnerId } = req.params;
 
         const messages = await prisma.message.findMany({
             where: {
@@ -46,11 +46,11 @@ export const getMessagesById = async (req: any, res: Response) => {
 export const sendMessage = async (req: any, res: Response) => {
     try {
         const userId: string = req.user.id;
-        const partnerId: string = req.params;
+        const {id : partnerId} = req.params;
         const { text, image }: { text: string, image: string } = req.body;
 
         const partnerExists = await prisma.user.findUnique({ where: { id: partnerId } });
-        if(!partnerExists) return res.status(400).json({message: "Receiver not found"});
+        if (!partnerExists) return res.status(400).json({ message: "Receiver not found" });
 
         if (userId === partnerId) return res.status(400).json({ message: "Cannot send message to yourself" })
         if (!image || !text.trim()) return res.status(400).json({ message: "Empty message found" })
