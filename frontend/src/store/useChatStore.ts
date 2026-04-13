@@ -86,11 +86,12 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     },
 
     sendMessage: async (msg) => {
-        const { selectedUser, messages } = get();
+        const { selectedUser } = get();
         const { authUser } = useAuthStore.getState();
+        const tempId = `temp-${new Date().toISOString()}`;
         try {
             const optimisticMessage: Message = {
-                id: `temp-${new Date().toISOString()}`,
+                id: tempId,
                 createdAt: new Date(Date.now()),
                 updatedAt: new Date(Date.now()),
                 senderId: authUser?.id || "",
@@ -98,12 +99,20 @@ export const useChatStore = create<ChatStore>((set, get) => ({
                 text: msg.text || "",
                 image: msg.image || "",
             }
-            set({ messages: [...messages, optimisticMessage] });
+            set((prev) => ({ messages: [...prev.messages, optimisticMessage] }));
 
             const res = await axiosInstance.post(`/messages/send/${selectedUser?.id}`, msg);
-            set({ messages: messages.concat(res.data) });
+            set((prev) => {
+                const idx = prev.messages.findIndex(m => m.id === tempId)
+                if(idx == -1) return {messages: [...prev.messages, res.data]};
+                const next = prev.messages.slice();
+                next[idx] = res.data;
+                return {messages: next};
+            })
         } catch (error) {
-            set({ messages: messages })
+            set(prev => ({
+                messages: prev.messages.filter(m => m.id !== tempId)
+            }))
             if (error instanceof AxiosError)
                 toast.error(error.response?.data.message || "Failed to send message!");
             console.log("Error while sending message: \n", error);

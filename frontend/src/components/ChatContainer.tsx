@@ -5,7 +5,6 @@ import ChatHeader from "./ChatHeader";
 import NoChatHistoryPlaceholder from "./NoChatHistoryPlaceholder";
 import MessageInput from "./MessageInput";
 import MessagesLoadingSkeleton from "./MessagesLoadingSkeleton";
-import { Check, CircleAlert, Clock } from "lucide-react";
 
 const ChatContainer = () => {
   const {
