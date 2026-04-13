@@ -1,18 +1,29 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 import ChatHeader from "./ChatHeader";
 import NoChatHistoryPlaceholder from "./NoChatHistoryPlaceholder";
 import MessageInput from "./MessageInput";
 import MessagesLoadingSkeleton from "./MessagesLoadingSkeleton";
+import { Check, CircleAlert, Clock } from "lucide-react";
 
 const ChatContainer = () => {
-  const { selectedUser, getMessagesByUserId, messages, isMessagesLoading} = useChatStore();
+  const {
+    selectedUser,
+    getMessagesByUserId,
+    messages,
+    isMessagesLoading,
+  } = useChatStore();
   const { authUser } = useAuthStore();
+  const messageEndRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (selectedUser) getMessagesByUserId(selectedUser.id);
   }, [selectedUser, getMessagesByUserId]);
+
+  useEffect(() => {
+      if(messageEndRef.current) messageEndRef.current.scrollIntoView({behavior: "smooth"})
+  }, [messages]);
   return (
     <>
       <ChatHeader />
@@ -42,18 +53,26 @@ const ChatContainer = () => {
                   )}
 
                   {msg.text && <p className="mt-2">{msg.text}</p>}
-                  <p className="text-xs mt-1 opacity-75 flex items-center gap-1">
-                    {new Date(msg.createdAt).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"})}
-                  </p>
+                  
+                    <p className="text-xs mt-1 opacity-75 flex items-center gap-1">
+                      {new Date(msg.createdAt).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
                 </div>
               </div>
             ))}
           </div>
-        ) : isMessagesLoading ? <MessagesLoadingSkeleton /> : (
+        ) : isMessagesLoading ? (
+          <MessagesLoadingSkeleton />
+        ) : (
           <NoChatHistoryPlaceholder
             name={selectedUser?.fullName || "your partner"}
           />
         )}
+
+        <div ref={messageEndRef}/>
       </div>
 
       <MessageInput />

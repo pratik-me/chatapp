@@ -2,7 +2,8 @@ import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 import { AxiosError } from "axios";
-import type { User, Message} from "@prisma/db-types"
+import type { User, Message } from "@prisma/db-types"
+import { useAuthStore } from "./useAuthStore";
 
 export type ChatStore = {
     allContacts: User[];
@@ -20,7 +21,7 @@ export type ChatStore = {
     getAllContacts: () => void;
     getChatPartners: () => void;
     getMessagesByUserId: (userId: string) => void;
-    sendMessage: (msg : {text?: string; image?: string | null}) => void;
+    sendMessage: (msg: { text?: string; image?: string | null }) => void;
 }
 
 export const useChatStore = create<ChatStore>((set, get) => ({
@@ -57,42 +58,55 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
     getChatPartners: async () => {
         try {
-            set({isUsersLoading: true});
+            set({ isUsersLoading: true });
             const res = await axiosInstance.get("/messages/chats");
-            set({chats: res.data});
+            set({ chats: res.data });
         } catch (error) {
             console.log(error);
-            if(error instanceof AxiosError)
+            if (error instanceof AxiosError)
                 toast.error(error.response?.data.message);
             else toast.error("Something went wrong while fetching chat partners!")
         } finally {
-            set({isUsersLoading: false});
+            set({ isUsersLoading: false });
         }
     },
 
-    getMessagesByUserId: async(userId) => {
+    getMessagesByUserId: async (userId) => {
         try {
-            set({isMessagesLoading: true});
+            set({ isMessagesLoading: true });
             const res = await axiosInstance.get(`/messages/${userId}`);
-            set({messages: res.data})
+            set({ messages: res.data })
         } catch (error) {
-            if(error instanceof AxiosError)
+            if (error instanceof AxiosError)
                 toast.error(error.response?.data.message || "Something went wrong!");
             console.log("Error while fetching partner message:", error);
         } finally {
-            set({isMessagesLoading: false});
+            set({ isMessagesLoading: false });
         }
     },
 
-    sendMessage: async(msg) => {
+    sendMessage: async (msg) => {
+        const { selectedUser, messages } = get();
+        const { authUser } = useAuthStore.getState();
         try {
-            const {selectedUser} = get();
+            const optimisticMessage: Message = {
+                id: `temp-${new Date().toISOString()}`,
+                createdAt: new Date(Date.now()),
+                updatedAt: new Date(Date.now()),
+                senderId: authUser?.id || "",
+                receiverId: selectedUser?.id || "",
+                text: msg.text || "",
+                image: msg.image || "",
+            }
+            set({ messages: [...messages, optimisticMessage] });
+
             const res = await axiosInstance.post(`/messages/send/${selectedUser?.id}`, msg);
-            set((prev) => ({messages: prev.messages.concat(res.data)}));
+            set({ messages: messages.concat(res.data) });
         } catch (error) {
-            if(error instanceof AxiosError)
+            set({ messages: messages })
+            if (error instanceof AxiosError)
                 toast.error(error.response?.data.message || "Failed to send message!");
-            console.log("Error while sending message: \n", error);   
+            console.log("Error while sending message: \n", error);
         }
     }
 }))
