@@ -8,13 +8,13 @@ import { connectDB } from "./lib/db.js";
 import cookieParser from "cookie-parser";
 import { ENV } from "./lib/env.js";
 import cors from "cors";
+import { app, server } from "./lib/socket.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
-const app = express();
 const PORT = ENV.PORT || 3000;
 
 app.set("trust proxy", 1);     // for load balancers
@@ -37,7 +37,7 @@ if (ENV.NODE_ENV === "production") {
     })
 }
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server running on port: ${PORT}`)
     connectDB();
 });
