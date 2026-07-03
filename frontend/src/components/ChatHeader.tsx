@@ -1,39 +1,49 @@
 import { XIcon } from "lucide-react";
-import { useChatStore } from "../store/useChatStore"
+import { useChatStore } from "../store/useChatStore";
 import { useEffect } from "react";
+import { useAuthStore } from "../store/useAuthStore";
 
 const ChatHeader = () => {
-    const {selectedUser, setSelectedUser} = useChatStore();
+  const { selectedUser, setSelectedUser } = useChatStore();
+  const { onlineUsers } = useAuthStore();
 
-    useEffect(() => {
-        const handleEscKey = (event: KeyboardEvent) => {
-            if(event.key === "Escape") setSelectedUser(null);
-        }
+  if(!selectedUser) return null;
+  const isOnline = onlineUsers.includes(selectedUser?.id);
 
-        window.addEventListener("keydown", handleEscKey);
+  useEffect(() => {
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSelectedUser(null);
+    };
 
-        return () => window.removeEventListener("keydown", handleEscKey);
-    }, [setSelectedUser]);
+    window.addEventListener("keydown", handleEscKey);
+
+    return () => window.removeEventListener("keydown", handleEscKey);
+  }, [setSelectedUser]);
   return (
     <div className="flex justify-between items-center bg-slate-800/50 border-b border-slate-700/50 max-h-[84px] px-6 flex-1">
-        <div className="flex items-center space-x-3">
-            <div className="avatar online">
-                <div className="w-12 rounded-full ring ring-cyan-400/30 ring-offset-2">
-                    <img src={selectedUser?.profilePic || "/avatar.png"} alt={selectedUser?.fullName} />
-                </div>
-            </div>
-
-            <div>
-                <h3 className="text-slate-200 font-medium">{selectedUser?.fullName}</h3>
-                <p className="text-slate-400 text-sm">Online</p>
-            </div>
+      <div className="flex items-center space-x-3">
+        <div className={`avatar ${isOnline ? "online" : "offline"}`}>
+          <div className="w-12 rounded-full ring ring-cyan-400/30 ring-offset-2">
+            <img
+              src={selectedUser?.profilePic || "/avatar.png"}
+              alt={selectedUser?.fullName}
+            />
+          </div>
         </div>
 
-        <button onClick={() => setSelectedUser(null)}>
-            <XIcon className="size-5 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"/>
-        </button>
-    </div>
-  )
-}
+        <div>
+          <h3 className="text-slate-200 font-medium">
+            {selectedUser?.fullName}
+          </h3>
+          <p className="text-slate-400 text-sm">{isOnline ? "Online" : "Offline"}</p>
+        </div>
+      </div>
 
-export default ChatHeader
+      <button onClick={() => setSelectedUser(null)}>
+        <XIcon className="size-5 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer" />
+      </button>
+    </div>
+  );
+};
+
+export default ChatHeader;

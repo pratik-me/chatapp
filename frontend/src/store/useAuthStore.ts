@@ -5,6 +5,9 @@ import { AxiosError } from "axios";
 import type { SignupFormData } from "../pages/SignupPage";
 import type { LoginFormData } from "../pages/LoginPage";
 import type { User } from "@prisma/db-types";
+import { io, Socket } from "socket.io-client";
+
+const BASE_URL = import.meta.env.FRONTEND_URI! || "http://localhost:3000";
 
 type AuthStore = {
     authUser: User | null;
@@ -12,24 +15,32 @@ type AuthStore = {
     isSingingUp: boolean;
     isLogginIn: boolean;
     isProfileLoading: boolean;
+    socket: null | Socket;
+    onlineUsers: string[];
+
     checkAuth: () => void;
     signup: (data: SignupFormData) => void;
     login: (data: LoginFormData) => void;
     logout: () => void;
     updateProfile: (data: any) => void;
+    connectSocket: () => void;
+    disconnectSocket: () => void;
 }
 
-export const useAuthStore = create<AuthStore>(set => ({
+export const useAuthStore = create<AuthStore>((set, get) => ({
     authUser: null,
     isCheckingAuth: true,
     isSingingUp: false,
     isLogginIn: false,
     isProfileLoading: false,
+    socket: null,
+    onlineUsers: [],
 
     checkAuth: async () => {
         try {
             const res = await axiosInstance.get("/auth/check");
             set({ authUser: res.data });
+            get().connectSocket();
         } catch (error) {
             console.log("Error in authCheck:", error);
             set({ authUser: null });
@@ -44,6 +55,7 @@ export const useAuthStore = create<AuthStore>(set => ({
             const res = await axiosInstance.post("/auth/signup", data);
             set({ authUser: res.data })
             toast.success("Account created successfully!");
+            get().connectSocket();
         } catch (error) {
             if (error instanceof AxiosError)
                 toast.error(error.response?.data.message);
@@ -62,6 +74,7 @@ export const useAuthStore = create<AuthStore>(set => ({
             const res = await axiosInstance.post("/auth/login", data);
             set({ authUser: res.data })
             toast.success("Logged in successfully!");
+            get().connectSocket();
         } catch (error) {
             if (error instanceof AxiosError)
                 toast.error(error.response?.data);
@@ -79,6 +92,7 @@ export const useAuthStore = create<AuthStore>(set => ({
             await axiosInstance.post("/auth/logout");
             set({ authUser: null });
             toast.success("Logged out successfully");
+            get().disconnectSocket();
         } catch (error) {
             toast.error("Failed to log out");
             console.log("Log Out error:\n", error)
@@ -98,5 +112,26 @@ export const useAuthStore = create<AuthStore>(set => ({
         } finally {
             set({isProfileLoading: false});
         }
+    },
+
+    connectSocket: () => {
+        const {authUser} = get();
+        const existing = get().socket;
+        if(!authUser || existing?.connected || existing?.active) return;
+
+        const socket = io(BASE_URL, {withCredentials: true});
+        socket.connect();
+        set({socket});
+        socket.on("getOnlineUsers", (userIds) => {
+            set({onlineUsers: userIds})
+        })
+    },
+
+    disconnectSocket: () => {
+        const existing = get().socket;
+        if(!existing) return;
+        existing.off("getOnlineUsers");
+        existing.disconnect();
+        set({socket: null, onlineUsers: []});
     }
 }))

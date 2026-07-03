@@ -1,5 +1,6 @@
 import type { Response } from "express";
 import prisma from "@prisma";
+import { getReceiverSocketId, io } from "../lib/socket.js";
 
 export const getAllContacts = async (req: any, res: Response) => {
     try {
@@ -44,7 +45,7 @@ export const getMessagesById = async (req: any, res: Response) => {
 export const sendMessage = async (req: any, res: Response) => {
     try {
         const userId: string = req.user.id;
-        const {id : partnerId} = req.params;
+        const { id: partnerId } = req.params;
         const { text, image }: { text: string, image: string } = req.body;
 
         const partnerExists = await prisma.user.findUnique({ where: { id: partnerId } });
@@ -52,27 +53,19 @@ export const sendMessage = async (req: any, res: Response) => {
 
         if (userId === partnerId) return res.status(400).json({ message: "Cannot send message to yourself" })
         if (!image && !text.trim()) return res.status(400).json({ message: "Empty message found" })
-        else if (!image) {
-            const message = await prisma.message.create({
-                data: {
-                    senderId: userId,
-                    receiverId: partnerId,
-                    text: text.trim(),
-                    image: "",
-                }
-            });
-
-            return res.status(201).json(message);
-        }
-
         const message = await prisma.message.create({
             data: {
                 senderId: userId,
                 receiverId: partnerId,
                 text: text.trim().length === 0 ? "" : text,
-                image
+                image: image || "",
             }
         });
+
+        const receiverSocketIds = getReceiverSocketId(userId, partnerId);
+        if(receiverSocketIds) {
+            receiverSocketIds.forEach(receiverSocketId => io.to(receiverSocketId).emit("newMessage", message)); 
+        }
 
         return res.status(201).json(message);
     } catch (error) {

@@ -12,6 +12,8 @@ const ChatContainer = () => {
     getMessagesByUserId,
     messages,
     isMessagesLoading,
+    subscribeToMessages,
+    unsubscribeFromMessages,
   } = useChatStore();
   const { authUser } = useAuthStore();
   const messageEndRef = useRef<HTMLInputElement | null>(null);
@@ -21,8 +23,16 @@ const ChatContainer = () => {
   }, [selectedUser, getMessagesByUserId]);
 
   useEffect(() => {
+    if(selectedUser) getMessagesByUserId(selectedUser.id);
+    subscribeToMessages()
+
+    return () => unsubscribeFromMessages();
+  }, [selectedUser, getMessagesByUserId, subscribeToMessages, unsubscribeFromMessages])
+
+  useEffect(() => {
       if(messageEndRef.current) messageEndRef.current.scrollIntoView({behavior: "smooth"})
   }, [messages]);
+
   return (
     <>
       <ChatHeader />

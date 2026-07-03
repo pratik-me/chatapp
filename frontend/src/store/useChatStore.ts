@@ -22,6 +22,8 @@ export type ChatStore = {
     getChatPartners: () => void;
     getMessagesByUserId: (userId: string) => void;
     sendMessage: (msg: { text?: string; image?: string | null }) => void;
+    subscribeToMessages: () => void;
+    unsubscribeFromMessages: () => void;
 }
 
 export const useChatStore = create<ChatStore>((set, get) => ({
@@ -117,5 +119,26 @@ export const useChatStore = create<ChatStore>((set, get) => ({
                 toast.error(error.response?.data.message || "Failed to send message!");
             console.log("Error while sending message: \n", error);
         }
+    },
+
+    subscribeToMessages: () => {
+        const {selectedUser, isSoundEnabled} = get();
+        if(!selectedUser) return;
+        const socket = useAuthStore.getState().socket;
+        socket?.on("newMessage", newMessage => {
+            if(newMessage.senderId !== selectedUser.id) return;
+            const currentMessages = get().messages;
+            set({messages: [...currentMessages, newMessage]});
+            if(isSoundEnabled) {
+                const notificationSound = new Audio("/sounds/notification.mp3");
+                notificationSound.currentTime = 0;
+                notificationSound.play().catch(error => console.log("Audio play failed:", error))
+            }
+        })
+    },
+
+    unsubscribeFromMessages: () => {
+        const socket = useAuthStore.getState().socket;
+        socket?.off("newMessage");
     }
 }))
